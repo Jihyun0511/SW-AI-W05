@@ -27,3 +27,6 @@ vgcore.*
 !.vscode/launch.json
 !.vscode/tasks.json
 !.vscode/extensions.json
+
+# 실행 파일 제외
+challenges/**/bug
