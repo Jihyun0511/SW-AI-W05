@@ -103,9 +103,9 @@ static Widget *widget_new(const VTable *vt, int id, const char *label) {
 }
 
 // 위젯 없애기
-static void widget_destroy(Widget *w) {
-    free(w);          
-}
+// static void widget_destroy(Widget *w) {
+//     free(w);          
+// }
 
 /* ── Screen ──────────────────────────────────────────────────── */
 // 화면에 추가하기: 최대 위젯 개수 이하이면 새로 생성해준다
@@ -117,7 +117,7 @@ static void screen_add(Screen *s, Widget *w) {
 static void screen_dispatch(Screen *s, int code) {
     for (int i = 0; i < s->count; i++) {
         Widget *w = s->items[i];
-        if (w == NULL) continue;;
+        if (w == NULL) continue;
         w->vtbl->on_event(w, code);
     }
 }
@@ -140,6 +140,22 @@ static void dialog_on_event(Widget *self, int code) {
     }
 }
 
+// 포인터 청소해줌
+void clean_screen(Screen *s) {
+    //closed 플래그가 1이면 청소
+    for (int i = 0; i < s->count; i++) {
+        Widget *w = s->items[i];
+        // widget 값이 있는지, 있다면 closed 인지 확인
+        if (w != NULL && w->closed == 1) {
+            free(w);
+            // s->items[i]->vtbl = NULL;
+            // 특정 인자를 NULL 하는 게 아니라 요소 전체를 비워줘야 접근을 안 함
+            // w로 접근하는 게 아니라 직접 접근해 주셔야 합니다 w는 그냥 값 복사본임!!
+            s->items[i] = NULL;
+        }
+    }
+}
+
 // 일부러 오염
 static char *app_build_status(const char *text) {
     char *msg = malloc(sizeof(Widget));   
@@ -153,19 +169,6 @@ static char *app_build_status(const char *text) {
     memset(msg, 0xAB, sizeof(Widget));
     snprintf(msg, sizeof(Widget), "STATUS: %s", text);
     return msg;
-}
-
-// 포인터 청소해줌
-void clean_screen(Screen *s) {
-    //closed 플래그가 1이면 청소
-    for (int i = 0; i < s->count; i++) {
-        if (s->items[i]->closed == 1) {
-            free(s->items[i]);
-            // s->items[i]->vtbl = NULL;
-            // 특정 인자를 NULL 하는 게 아니라 요소 전체를 비워줘야 접근을 안 함
-            s->items[i] = NULL;
-        }
-    }
 }
 
 int main(void) {
