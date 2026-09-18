@@ -82,6 +82,7 @@ static const VTable BUTTON_VT = { button_render, widget_noop_event };
 static const VTable LABEL_VT  = { label_render,  widget_noop_event };
 static const VTable DIALOG_VT = { dialog_render, dialog_on_event  };
 
+// 위젯 생성하기
 static Widget *widget_new(const VTable *vt, int id, const char *label) {
 
     /* [Thinking Point]
@@ -101,36 +102,45 @@ static Widget *widget_new(const VTable *vt, int id, const char *label) {
     return w;
 }
 
+// 위젯 없애기
 static void widget_destroy(Widget *w) {
     free(w);          
 }
 
 /* ── Screen ──────────────────────────────────────────────────── */
+// 화면에 추가하기: 최대 위젯 개수 이하이면 새로 생성해준다
 static void screen_add(Screen *s, Widget *w) {
     if (s->count < MAX_WIDGETS) s->items[s->count++] = w;
 }
 
+// 화면에 보내기?: 이벤트 발생
 static void screen_dispatch(Screen *s, int code) {
     for (int i = 0; i < s->count; i++) {
         Widget *w = s->items[i];
+        if (w == NULL) continue;;
         w->vtbl->on_event(w, code);
     }
 }
 
+// 화면에 그리기
 static void screen_render(Screen *s) {
     for (int i = 0; i < s->count; i++) {
         Widget *w = s->items[i];
+        if (w == NULL) continue;
         w->vtbl->render(w);      
     }
 }
 
+// 다이얼로그 닫기 발생
 static void dialog_on_event(Widget *self, int code) {
     if (code == 1) {
+        // 플래그 설정만 하고 나중에 뿌수자
         self->closed = 1;
-        widget_destroy(self);   
+        // widget_destroy(self);   
     }
 }
 
+// 일부러 오염
 static char *app_build_status(const char *text) {
     char *msg = malloc(sizeof(Widget));   
     if (!msg) exit(1);
@@ -143,6 +153,19 @@ static char *app_build_status(const char *text) {
     memset(msg, 0xAB, sizeof(Widget));
     snprintf(msg, sizeof(Widget), "STATUS: %s", text);
     return msg;
+}
+
+// 포인터 청소해줌
+void clean_screen(Screen *s) {
+    //closed 플래그가 1이면 청소
+    for (int i = 0; i < s->count; i++) {
+        if (s->items[i]->closed == 1) {
+            free(s->items[i]);
+            // s->items[i]->vtbl = NULL;
+            // 특정 인자를 NULL 하는 게 아니라 요소 전체를 비워줘야 접근을 안 함
+            s->items[i] = NULL;
+        }
+    }
 }
 
 int main(void) {
@@ -158,6 +181,7 @@ int main(void) {
     screen_dispatch(&s, 1);
 
     /* TODO 닫힌(closed) 위젯을 여기서 정리(free + 해당 슬롯 NULL)할 필요가 있음 */
+    clean_screen(&s);
 
     char *status = app_build_status("dialog closed");
     printf("%s\n", status);
