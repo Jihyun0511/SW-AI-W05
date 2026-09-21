@@ -67,8 +67,8 @@ static void list_ensure(IntList *l, size_t need) {
     while (newcap < need) newcap *= 2;
 
     // newcap 구해놓고 cap으로 넣어서 터짐... newcap 사이즈만큼 넣어줍시다
-    int *p = realloc(l->data, l->cap * sizeof(int));
-    //int *p = realloc(l->data, newcap * sizeof(int));
+    // int *p = realloc(l->data, l->cap * sizeof(int));
+    int *p = realloc(l->data, newcap * sizeof(int));
     if (!p) { perror("realloc"); free(l->data); exit(1); }
 
     l->data = p;
