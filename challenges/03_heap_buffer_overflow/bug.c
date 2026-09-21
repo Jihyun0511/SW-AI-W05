@@ -62,10 +62,12 @@ static void list_init(IntList *l) {
 static void list_ensure(IntList *l, size_t need) {
     if (need <= l->cap) return;
 
+    // Init에서 8로 초기값 세팅해주기는 하는데, 방어적 프로그래밍
     size_t newcap = l->cap ? l->cap * 2 : 8;
     while (newcap < need) newcap *= 2;
 
-    int *p = realloc(l->data, l->cap * sizeof(int));
+    // newcap 구해놓고 cap으로 넣어서 터짐... newcap 사이즈만큼 넣어줍시다
+    int *p = realloc(l->data, newcap * sizeof(int));
     if (!p) { perror("realloc"); free(l->data); exit(1); }
 
     l->data = p;
