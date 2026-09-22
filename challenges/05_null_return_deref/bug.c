@@ -43,7 +43,11 @@ typedef struct {
 } Config;
 
 static void cfg_set(Config *c, const char *k, const char *v) {
-    if (c->n < MAX_KV) { c->keys[c->n] = k; c->vals[c->n] = v; c->n++; }
+    if (c->n < MAX_KV) { 
+        c->keys[c->n] = k; 
+        c->vals[c->n] = v; 
+        c->n++; 
+    }
 }
 
 static const char *cfg_get(const Config *c, const char *k) {
@@ -56,15 +60,25 @@ static void expand(const Config *c, const char *tmpl, char *out, size_t outcap) 
     size_t o = 0;
     for (const char *p = tmpl; *p; ) {
         if (p[0] == '$' && p[1] == '{') {
+            // strchr: 스트링 p에서의 문자를 찾아서 포인터 반환, 없으면 널반환
             const char *end = strchr(p, '}');
             if (!end) break;
             char key[32];
             size_t kl = (size_t)(end - (p + 2));
+            // kl = sizeof key - 1 이건 문제없다. kl이 더 길 때를 대비한 방어용 코드임!
             if (kl >= sizeof key) kl = sizeof key - 1;
+            // memcopy(복사 받을 메모리 포인터, 복사할 메모리 포인터, 복사할 값의 길이)
+            // p+2에 있는 원본을 kl만큼 복사해서 key에 넣는다
             memcpy(key, p + 2, kl);
             key[kl] = '\0';
 
-            const char *v = cfg_get(c, key);      
+            // host, port는 넣어줬는데, path는 넣어준 적이 없다!
+            // NULL 반환, v에 들어간다
+            // 포인터를 반환하는 함수는 반드시 NULL인지 확인하는 방어 로직을 넣어줘야 한다!!!
+            const char *v = cfg_get(c, key);
+            // strlen에 NULL 이 들어가서 터진다!
+            // strlen은 0NULL번지로 가서 역참고dereference, 메모리를 읽으려고 시도
+            // 운영체제: 엥 0번 왜옴? 죽어라
             size_t vl = strlen(v);                 
             if (o + vl < outcap) { memcpy(out + o, v, vl); o += vl; }
             p = end + 1;
