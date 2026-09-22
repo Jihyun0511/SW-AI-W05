@@ -100,6 +100,11 @@ static void directory_dump(Directory *d) {
 }
 
 static void directory_free(Directory *d) {
+    // by_id로 free하든, by_name으로 free 하든 똑같지만
+    // 원본(id)로 해주는 게 관례에 더 맞다
+    // rec_new에서 데이터 생성할 때 id, name 둘 다 할당해줬으니까 둘 다 free해줘야 함
+    // 지우는 순서도 중요하다 name 지우고 id 지워야 함!
+    // id 먼저 지우면 지워진 id로 name에 접근하려고 해서 터짐
     for (int i = 0; i < d->count; i++) {
         free(d->by_id[i]->name);
         free(d->by_id[i]);                 
