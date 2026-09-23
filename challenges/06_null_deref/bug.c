@@ -47,9 +47,18 @@ static char *skip_ws(char *s) {
 
 static void parse_headers(char *text, Headers *h) {
     for (char *line = strtok(text, "\n"); line != NULL; line = strtok(NULL, "\n")) {
-        char *colon = strchr(line, ':');   
+        // "Connection"에는 ":" 이 없는데 strchr으로 콜론 찾으려고 함
+        // 없으니까 NULL 반환
+        char *colon = strchr(line, ':');
 
-        *colon = '\0';                    
+        // NULL에 값을 쓰려고 함. 터짐!
+        // NULL이면 아래 전부 스킵
+        if (colon == NULL){
+            continue;
+        }
+
+        // NULL 아니면 원래대로 진행
+        *colon = '\0';
         char *key = line;
         char *val = skip_ws(colon + 1);
 
@@ -66,11 +75,11 @@ int main(void) {
     char raw[] =
         "Host: example.com\n"
         "Accept: */*\n"
-        "Connection\n"                     
+        "Connection\n"
         "User-Agent: memdbg-cli\n";
 
     Headers h = { .count = 0 };
-    parse_headers(raw, &h);                
+    parse_headers(raw, &h);
 
     printf("parsed %d headers\n", h.count);
     for (int i = 0; i < h.count; i++)
