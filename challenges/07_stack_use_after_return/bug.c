@@ -53,12 +53,20 @@ static void view_set(LineView *out, char **arr, int n) {
 }
 
 static void split_lines(LineView *out, char *text) {
-    char *parts[MAX_LINES];              
+    // 지역 변수는 스택에 할당되어서 함수가 끝나면 해제됨
+    // malloc으로 힙에 할당해버리면 안 없어짐!!
+    // char *parts[MAX_LINES];             
+    char **parts = malloc(MAX_LINES * sizeof(char *));
     int n = 0;
     /* strtok는 새로 할당하지 않고, 넘겨받은 문자열 내부의 주소를 돌려준다. 
     * 따라서, strtok은 원본 버퍼를 제자리에서 수정한다. 
     */
+   // "\n" 기준으로 쪼개기
+   // strtok은 \n을 만나면 첫 번째 조각의 시작 주소를 반환함
+   // ln: NULL이 아닌지 확인 // 8칸 이상 안 하게 확인
+   // strtok은 쪼개기 한 자리를 기억하고 있음. 거기부터 다음 \n까지 또 쪼개기
     for (char *ln = strtok(text, "\n"); ln && n < MAX_LINES; ln = strtok(NULL, "\n"))
+        // 주소 저장하고, n 증가
         parts[n++] = ln;
 
     view_set(out, parts, n);      
@@ -79,6 +87,7 @@ int main(void) {
     char text[] = "alpha\nbeta\ngamma";
 
     LineView v;
+    // &(**v.lines)== *v.lines 니까 인자로 넘어간 놈은 사실 v의 주소인거지
     split_lines(&v, text);               
     warm_stack();                        
 
