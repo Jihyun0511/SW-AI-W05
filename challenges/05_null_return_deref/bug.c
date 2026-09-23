@@ -79,8 +79,10 @@ static void expand(const Config *c, const char *tmpl, char *out, size_t outcap) 
             // strlen에 NULL 이 들어가서 터진다!
             // strlen은 0NULL번지로 가서 역참고dereference, 메모리를 읽으려고 시도
             // 운영체제: 엥 0번 왜옴? 죽어라
-            size_t vl = strlen(v);                 
-            if (o + vl < outcap) { memcpy(out + o, v, vl); o += vl; }
+            if (v != NULL) {
+                size_t vl = strlen(v);
+                if (o + vl < outcap) { memcpy(out + o, v, vl); o += vl; }
+            }
             p = end + 1;
         } else {
             if (o + 1 < outcap) out[o++] = *p;
