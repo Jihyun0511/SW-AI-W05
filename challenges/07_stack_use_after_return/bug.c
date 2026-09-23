@@ -96,5 +96,8 @@ int main(void) {
         checksum += (unsigned char)v.lines[i][0];
 
     printf("lines = %d, checksum = %ld\n", v.count, checksum);
+
+    // 할당했던 놈 free해주자...
+    free(v.lines);
     return 0;
 }
