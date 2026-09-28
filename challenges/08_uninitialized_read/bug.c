@@ -72,11 +72,16 @@ static void dirty_heap(void) {
 }
 
 static int **make_matrix(void) {
+    // calloc으로 공간할당 + 초기화
+    // int **rows = malloc(ROWS * sizeof(int *));
+    // if (!rows) { perror("malloc"); exit(1); }
+    int **rows = calloc(ROWS, sizeof(int *));
+    if (!rows) { perror("calloc"); exit(1); }
 
-    int **rows = malloc(ROWS * sizeof(int *));
-    if (!rows) { perror("malloc"); exit(1); }
-
+    // 짝수에만 malloc 해준다
+    // 홀수에는 공간 할당 안 함 (calloc으로 초기화한 NULL 값 그대로)
     for (int i = 0; i < ROWS; i += 2) {
+        // malloc 한 다음 값 바로 덮어씌우니까, 여기서는 calloc 사용할 필요 없음
         int *r = malloc(COLS * sizeof(int));
         for (int j = 0; j < COLS; j++) r[j] = i * COLS + j;
         rows[i] = r;
@@ -87,8 +92,11 @@ static int **make_matrix(void) {
 static long row_sum(int **rows, int nrows) {
     long total = 0;
     for (int i = 0; i < nrows; i++) {
-        for (int j = 0; j < COLS; j++) {
-            total += rows[i][j];      
+        // 짝수만(NULL이 아닌 행만) 값 더하기
+        if (rows[i] != NULL) {   
+            for (int j = 0; j < COLS; j++) {
+                total += rows[i][j];
+            }
         }
     }
     return total;
