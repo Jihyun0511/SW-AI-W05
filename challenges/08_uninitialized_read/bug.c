@@ -71,6 +71,7 @@ static void dirty_heap(void) {
     }
 }
 
+// 2차원 배열 만들기
 static int **make_matrix(void) {
     // calloc으로 공간할당 + 초기화
     // int **rows = malloc(ROWS * sizeof(int *));
@@ -89,6 +90,7 @@ static int **make_matrix(void) {
     return rows;
 }
 
+// 총합 구하기
 static long row_sum(int **rows, int nrows) {
     long total = 0;
     for (int i = 0; i < nrows; i++) {
