@@ -61,7 +61,18 @@ static void eb_init(EditBuffer *e) {
 }
 
 static void eb_snapshot(EditBuffer *e) {
-    if (e->undo_n < MAX_UNDO) e->undo[e->undo_n++] = e->data;
+    if (e->undo_n < MAX_UNDO) {
+        // e->undo[e->undo_n++] = e->data;
+        // 1. 현재 데이터의 길이만큼 새로운 메모리 공간 할당
+        int *snapshot_copy = malloc(e->len * sizeof(int));
+        if (!snapshot_copy) { perror("malloc snapshot"); exit(1); }
+
+        // 2. 현재 버퍼의 내용을 새로 할당한 공간에 복사
+        memcpy(snapshot_copy, e->data, e->len * sizeof(int));
+
+        // 3. 새로 만든 복사본의 주소를 undo 배열에 저장
+        e->undo[e->undo_n++] = snapshot_copy;
+    }
 }
 
 static void eb_grow(EditBuffer *e, size_t need) {
@@ -96,7 +107,7 @@ int main(void) {
 
     eb_snapshot(&e);                 
 
-    for (int i = 0; i < 4000; i++) eb_push(&e, i);     
+    for (int i = 0; i < 4000; i++) eb_push(&e, i);
 
     printf("len=%zu cap=%zu head=%d tail=%d\n",
            e.len, e.cap, e.data[0], e.data[e.len - 1]);
