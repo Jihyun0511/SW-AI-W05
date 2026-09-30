@@ -83,10 +83,11 @@ int main(void) {
     for (int i = 0; i < 100000; i++) {
         char buf[32];
         snprintf(buf, sizeof buf, "%s-%d", words[i % nwords], i);
-        last = intern(buf);
+        char *ret = intern(buf);
         
-        if (last == NULL) break;
-        
+        if (ret == NULL) break;
+
+        last = ret;
         total += (long)strlen(last);
     }
 
