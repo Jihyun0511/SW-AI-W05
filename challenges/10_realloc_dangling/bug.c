@@ -80,7 +80,7 @@ static void eb_grow(EditBuffer *e, size_t need) {
     while (nc < need) nc *= 2;
     int *p = realloc(e->data, nc * sizeof(int));   
     if (!p) { perror("realloc"); free(e->data); exit(1); }
-    e->data = p;                                   
+    e->data = p; 
     e->cap = nc;
 }
 
@@ -93,7 +93,7 @@ static void eb_free(EditBuffer *e) {
     free(e->data);
     free(e->clipboard);
     for (int i = 0; i < e->undo_n; i++) {
-        free(e->undo[i]);           
+        free(e->undo[i]);
     }
     e->undo_n = 0;
     e->data = NULL;
